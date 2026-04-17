@@ -40,7 +40,7 @@ public class Message implements CharSequence {
         sendMessage(sender, variables.process(sender, content));
     }
 
-    public void sendThrottled(@NotNull CommandSender sender) {
+    public void sendThrottledTo(@NotNull CommandSender sender) {
         if (isBlank()) {
             return;
         }
@@ -48,7 +48,7 @@ public class Message implements CharSequence {
         sendThrottled(sender, content);
     }
 
-    public void sendThrottled(@NotNull CommandSender sender, @NotNull Variables variables) {
+    public void sendThrottledTo(@NotNull CommandSender sender, @NotNull Variables variables) {
         if (isBlank()) {
             return;
         }
