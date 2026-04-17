@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'me.re4erka'
-version = '1.4'
+version = '1.4.1'
 
 repositories {
     mavenCentral()
@@ -56,6 +56,9 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(8)
     }
+
+    withSourcesJar()
+    withJavadocJar()
 }
 
 tasks.named('test') {
@@ -69,7 +72,21 @@ publishing {
 
             groupId = 'me.re4erka'
             artifactId = 'messagify'
-            version = '1.4'
+            version = '1.4.1'
+
+            pom {
+                name = 'Messagify'
+                description = 'it\'s simply a formatter for any variables.'
+                url = 'https://github.com/RE4ERKA/Messagify'
+
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                        distribution = 'repo'
+                    }
+                }
+            }
         }
     }
 }

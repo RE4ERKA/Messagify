@@ -1,5 +1,7 @@
 package me.re4erka.messagify.message;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import me.re4erka.messagify.Messagify;
 import me.re4erka.messagify.variable.Variables;
 import org.apache.commons.lang.StringUtils;
@@ -8,18 +10,22 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.TimeUnit;
+
 public class Message implements CharSequence {
 
     private final String content;
 
-    private static final Message EMPTY = of(StringUtils.EMPTY);
+    private static final Cache<CommandSender, String> COOLDOWN = CacheBuilder.newBuilder()
+            .expireAfterWrite(1, TimeUnit.SECONDS)
+            .build();
 
     private Message(@NotNull String content) {
         this.content = content;
     }
 
     public void sendTo(@NotNull CommandSender sender) {
-        if (isEmptyOrBlank()) {
+        if (isBlank()) {
             return;
         }
 
@@ -27,11 +33,27 @@ public class Message implements CharSequence {
     }
 
     public void sendTo(@NotNull CommandSender sender, @NotNull Variables variables) {
-        if (isEmptyOrBlank()) {
+        if (isBlank()) {
             return;
         }
 
         sendMessage(sender, variables.process(sender, content));
+    }
+
+    public void sendThrottled(@NotNull CommandSender sender) {
+        if (isBlank()) {
+            return;
+        }
+
+        sendThrottled(sender, content);
+    }
+
+    public void sendThrottled(@NotNull CommandSender sender, @NotNull Variables variables) {
+        if (isBlank()) {
+            return;
+        }
+
+        sendThrottled(sender, variables.process(sender, content));
     }
 
     @Override
@@ -56,14 +78,23 @@ public class Message implements CharSequence {
         return content;
     }
 
-    public boolean isEmptyOrBlank() {
-        return this == EMPTY
-                || StringUtils.isBlank(content);
+    public boolean isBlank() {
+        return StringUtils.isBlank(content);
     }
 
     private void sendMessage(@NotNull CommandSender sender, @NotNull String content) {
         sender.sendMessage(isConsoleSender(sender)
                 ? Messagify.strip(content) : Messagify.format(content));
+    }
+
+    private void sendThrottled(@NotNull CommandSender sender, @NotNull String message) {
+        final String lastMessage = COOLDOWN.getIfPresent(sender);
+        if (message.equals(lastMessage)) {
+            return;
+        }
+
+        COOLDOWN.put(sender, message);
+        sendMessage(sender, message);
     }
 
     private boolean isConsoleSender(@NotNull CommandSender sender) {
@@ -73,12 +104,6 @@ public class Message implements CharSequence {
 
     @NotNull
     public static Message of(@NotNull String content) {
-        return StringUtils.isBlank(content)
-                ? empty() : new Message(content);
-    }
-
-    @NotNull
-    public static Message empty() {
-        return EMPTY;
+        return new Message(content);
     }
 }
