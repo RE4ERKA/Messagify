@@ -346,8 +346,13 @@ public class Variables {
         }
 
         @NotNull
-        public Builder addAll(@NotNull ConfigurationVariables variables) {
-            variables.variables().forEach((key, value) -> {
+        public Builder addAll(@NotNull ConfigurationVariables configuration) {
+            return addAll(configuration.variables());
+        }
+
+        @NotNull
+        public Builder addAll(@NotNull Map<String, String> variables) {
+            variables.forEach((key, value) -> {
                 final Variable variable = Variable.common(key, value);
                 add(variable);
             });
@@ -355,8 +360,13 @@ public class Variables {
         }
 
         @NotNull
-        public Builder replaceAll(@NotNull ConfigurationVariables variables) {
-            variables.variables().forEach((key, value) -> {
+        public Builder replaceAll(@NotNull ConfigurationVariables configuration) {
+            return replaceAll(configuration.variables());
+        }
+
+        @NotNull
+        public Builder replaceAll(@NotNull Map<String, String> variables) {
+            variables.forEach((key, value) -> {
                 final Variable variable = Variable.common(key, value);
                 this.variables.removeIf(v -> v.search.equals(variable.search));
                 this.variables.add(variable);
